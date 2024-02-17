@@ -140,7 +140,7 @@ class IntentAssistant:
 
         return predicted_intent
 
-    def process_input(self, input_text):
+    def process_input(self, input_text) -> object:
         predicted_intent = self._predict_intent(input_text)
 
         try:
@@ -149,6 +149,16 @@ class IntentAssistant:
 
             for intent in self.intents_data["intents"]:
                 if intent["intent"] == predicted_intent:
-                    return random.choice(intent["responses"])
+
+                    return {
+                        "intent": intent["intent"],
+                        "variables": intent["expected_variables"],
+                        "responses": intent["responses"]
+                    }
+
         except IndexError:
-            return "I don't understand. Please try again."
+            return {
+                "intent": 0,
+                "variables": 0,
+                "responses": 0
+            }
