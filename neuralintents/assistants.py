@@ -15,7 +15,7 @@ from tensorflow.keras.layers import Dense, Dropout, InputLayer
 from tensorflow.keras.optimizers import Adam, Optimizer
 
 
-class BasicAssistant:
+class IntentAssistant:
 
     def __init__(self, intents_data: Union[str, os.PathLike, dict], method_mappings: dict = {}, hidden_layers: list = None, model_name: str = "basic_model") -> None:
 
@@ -48,13 +48,13 @@ class BasicAssistant:
         documents = []
 
         for intent in self.intents_data["intents"]:
-            if intent["tag"] not in self.intents:
-                self.intents.append(intent["tag"])
+            if intent["intent"] not in self.intents:
+                self.intents.append(intent["intent"])
 
-            for pattern in intent["patterns"]:
+            for pattern in intent["recognition_patterns"]:
                 pattern_words = nltk.word_tokenize(pattern)
                 self.words += pattern_words
-                documents.append((pattern_words, intent["tag"]))
+                documents.append((pattern_words, intent["intent"]))
 
         self.words = [self.lemmatizer.lemmatize(w.lower()) for w in self.words if w not in ignore_letters]
         self.words = sorted(set(self.words))
@@ -80,7 +80,7 @@ class BasicAssistant:
 
         return X, y
 
-    def fit_model(self, optimizer: Optimizer = None, epochs: int = 200):
+    def fit_model(self, optimizer: Optimizer = None, epochs=200):
         X, y = self._prepare_intents_data()
 
         if self.hidden_layers is None:
@@ -116,7 +116,7 @@ class BasicAssistant:
         self.words = pickle.load(open(f'{self.model_name}_words.pkl', 'rb'))
         self.intents = pickle.load(open(f'{self.model_name}_intents.pkl', 'rb'))
 
-    def _predict_intent(self, input_text: str):
+    def _predict_intent(self, input_text):
         input_words = nltk.word_tokenize(input_text)
         input_words = [self.lemmatizer.lemmatize(w.lower()) for w in input_words]
 
@@ -140,7 +140,7 @@ class BasicAssistant:
 
         return predicted_intent
 
-    def process_input(self, input_text: str):
+    def process_input(self, input_text):
         predicted_intent = self._predict_intent(input_text)
 
         try:
@@ -148,14 +148,7 @@ class BasicAssistant:
                 self.method_mappings[predicted_intent]()
 
             for intent in self.intents_data["intents"]:
-                if intent["tag"] == predicted_intent:
+                if intent["intent"] == predicted_intent:
                     return random.choice(intent["responses"])
         except IndexError:
             return "I don't understand. Please try again."
-
-
-class GenericAssistant(BasicAssistant):
-    def __init__(self, *args, **kwargs):
-        import warnings
-        warnings.warn("The 'GenericAssistant' class is deprecated and will be removed in future versions. Please use 'BasicAssistant' instead.", DeprecationWarning, stacklevel=2)
-        super().__init__(*args, **kwargs)
