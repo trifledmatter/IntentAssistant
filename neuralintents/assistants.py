@@ -141,6 +141,19 @@ class IntentAssistant:
         return predicted_intent
 
     def process_input(self, input_text) -> object:
+        """
+        
+        Returns:
+            object: The intent, expected variables, and responses based on the input text.
+
+            example:
+            {
+                "intent": intent["intent"],
+                "variables": intent["expected_variables"],
+                "responses": intent["responses"]
+            }
+        
+        """
         predicted_intent = self._predict_intent(input_text)
 
         try:
